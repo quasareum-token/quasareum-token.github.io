@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quasareum Project</title>
+    <link rel="icon" type="image/png" href="images/logo_min_no_bg.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #00aaff;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #aaa;
+            --border-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .project-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+        }
+
+        .project-description {
+            font-size: 1rem;
+            color: var(--secondary-text-color);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-section {
+            background-color: #2a2a2a;
+            padding: 24px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .info-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .section-description {
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .links-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-button {
+            flex: 1;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            text-align: center;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .nav-button:hover {
+            background-color: #0088cc;
+            transform: translateY(-2px);
+        }
+
+        .nav-button.testnet {
+            background-color: #444;
+        }
+
+        .nav-button.testnet:hover {
+            background-color: #555;
+        }
+
+        .nav-button.full-width {
+            flex-basis: 100%;
+        }
+
+        .hashrate-list {
+            list-style: none;
+            padding: 0;
+            font-size: 0.95rem;
+        }
+
+        .hashrate-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hashrate-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .hashrate-item span:first-child {
+            color: var(--secondary-text-color);
+        }
+        .hashrate-item span:last-child {
+            font-weight: 500;
+        }
+
+        .hashrate-note {
+            font-size: 0.8rem;
+            color: var(--secondary-text-color);
+            margin-top: 12px;
+            text-align: right;
+        }
+
+        .social-links {
+            margin-top: 32px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .social-links a {
+            color: var(--secondary-text-color);
+            font-size: 28px;
+            text-decoration: none;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--secondary-text-color);
+        }
+
+        @media (max-width: 600px) {
+            .links-wrapper {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="project-title">Quasareum Project</h1>
+        <p class="project-description">
+            Quasareum is a project focused on accessible cryptocurrency mining. Its unique hashing algorithm is specifically designed for high efficiency on <strong>low-energy (LE) devices</strong>, allowing anyone to participate. The token also features a fully on-chain, built-in market for decentralized trading.
+        </p>
+
+        <div class="main-container">
+            <div class="info-section">
+                <h2>Miners</h2>
+                <p class="section-description">
+                    Download the official command-line miner for your operating system. Check the repository for the latest releases and documentation.
+                </p>
+                <div class="links-wrapper">
+                    <a href="https://github.com/quasareum-token/quasareum" target="_blank" rel="noopener noreferrer" class="nav-button full-width">View on GitHub</a>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>Market</h2>
+                <p class="section-description">
+                    Trade QSRM tokens directly with the smart contract's decentralized liquidity pool. No intermediaries, pure on-chain exchange.
+                </p>
+                <div class="links-wrapper">
+                    <a href="market.html" class="nav-button">Mainnet</a>
+                    <a href="market_testnet.html" class="nav-button testnet">Testnet</a>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>Get Mining Reward</h2>
+                <p class="section-description">
+                    Submit your found solutions to the smart contract to validate your work and receive QSRM rewards directly to your wallet.
+                </p>
+                <div class="links-wrapper">
+                    <a href="submit.html" class="nav-button">Mainnet</a>
+                    <a href="submit_testnet.html" class="nav-button testnet">Testnet</a>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>Average Hashrates</h2>
+                <div class="hashrate-list">
+                    <div class="hashrate-item">
+                        <span>PC</span>
+                        <span>~50,000+ h/s</span>
+                    </div>
+                    <div class="hashrate-item">
+                        <span>ESP32</span>
+                        <span>~20,000 h/s</span>
+                    </div>
+                    <div class="hashrate-item">
+                        <span>ESP8266</span>
+                        <span>~11,000 h/s</span>
+                    </div>
+                     <div class="hashrate-item">
+                        <span>Arduino</span>
+                        <span>~1,000 h/s</span>
+                    </div>
+                </div>
+                 <p class="hashrate-note">* PC performance depends on software & hardware</p>
+            </div>
+        </div>
+
+        <div class="social-links">
+            <a href="https://t.me/quasareum" target="_blank" rel="noopener noreferrer" title="Telegram">
+                <i class="fa-brands fa-telegram"></i>
+            </a>
+            <a href="https://github.com/quasareum-token/quasareum" target="_blank" rel="noopener noreferrer" title="GitHub">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            </div>
+
+        <footer>
+            <p>&copy; 2025 Quasareum Project. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

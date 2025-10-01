@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quasareum Market (Hoodi Testnet)</title>
+    <link rel="icon" type="image/png" href="images/logo_min_no_bg.png">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #00aaff;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #888;
+            --border-color: #333;
+            --error-color: #ff4d4d;
+            --success-color: #4dff4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            flex-basis: 100%;
+            text-align: center;
+        }
+
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        #user-balance {
+            font-size: 0.8rem;
+            background: #2a2a2a;
+            padding: 6px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        #connect-button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        #connect-button:hover {
+            background-color: #0088cc;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background-color: transparent;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            background-color: #3a3a3a;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group {
+            background-color: #2a2a2a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            width: 100%;
+            outline: none;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+
+        .token-symbol {
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 6px 12px;
+            background: #3a3a3a;
+            border-radius: 6px;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: -4px 0;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background-color: #0088cc;
+        }
+
+        .submit-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        #status-message {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            min-height: 1.2em;
+            word-wrap: break-word;
+        }
+
+        .error { color: var(--error-color); }
+        .success { color: var(--success-color); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quasareum Market (Hoodi Testnet)</h1>
+            <div class="wallet-info">
+                <span id="user-balance">ETH: 0.0 | QSRMt: 0.0</span>
+                <button id="connect-button">Connect Wallet</button>
+            </div>
+        </header>
+
+        <main class="dex-form">
+            <form id="dex-form" data-mode="buy">
+                <div class="tabs">
+                    <button type="button" class="tab-button active" data-mode="buy">Buy QSRMt</button>
+                    <button type="button" class="tab-button" data-mode="sell">Sell QSRMt</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount-in" id="label-in">You Pay (ETH)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="amount-in" placeholder="0.0" step="any" min="0">
+                        <span class="token-symbol" id="symbol-in">ETH</span>
+                    </div>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="form-group">
+                    <label for="amount-out" id="label-out">You Receive (QSRMt)</label>
+                     <div class="input-wrapper">
+                        <input type="text" id="amount-out" placeholder="0.0" disabled>
+                         <span class="token-symbol" id="symbol-out">QSRMt</span>
+                    </div>
+                </div>
+
+                <button id="submit-button" class="submit-button" disabled>Connect Wallet</button>
+                <p id="status-message"></p>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CONTRACT_ADDRESS = "0x1563a5D7747D6b0e4FE0c299aFfC6C30a5f29371";
+            // --- NETWORK CONFIGURATION UPDATED ---
+            const TARGET_CHAIN_ID = "0x88bb0"; // 560048 for Ethereum Hoodi
+            const TARGET_NETWORK_NAME = "Ethereum Hoodi";
+            const TARGET_RPC_URL = "https://0xrpc.io/hoodi";
+            // --- END OF UPDATE ---
+
+            const CONTRACT_ABI = [
+                {"inputs":[{"internalType":"uint256","name":"initialMarketTokens","type":"uint256"},{"internalType":"uint256","name":"initialPrice","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"ethSpent","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"tokensReceived","type":"uint256"}],"name":"Bought","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"MarketPaused","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"MarketUnpaused","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"miner","type":"address"},{"indexed":false,"internalType":"string","name":"solution","type":"string"}],"name":"Mined","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"Paused","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"seller","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokensSold","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"ethReceived","type":"uint256"}],"name":"Sold","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},
+                {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"Unpaused","type":"event"},
+                {"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"uint256","name":"expectedTokens","type":"uint256"}],"name":"buy","outputs":[],"stateMutability":"payable","type":"function"},
+                {"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"uint256","name":"ethAmount","type":"uint256"}],"name":"getBuyAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"uint256","name":"tokenAmount","type":"uint256"}],"name":"getSellAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[],"name":"marketPaused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"string","name":"solution","type":"string"}],"name":"mine","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+                {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+                {"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[],"name":"pauseMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+                {"inputs":[],"name":"pricePerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"string","name":"s","type":"string"}],"name":"quasareumHash","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},
+                {"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"expectedEth","type":"uint256"}],"name":"sell","outputs":[],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[{"internalType":"uint256","name":"newPrice","type":"uint256"}],"name":"setPrice","outputs":[],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+                {"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"},
+                {"inputs":[],"name":"unpauseMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+            ];
+
+            const connectButton = document.getElementById('connect-button');
+            const submitButton = document.getElementById('submit-button');
+            const statusMessage = document.getElementById('status-message');
+            const userBalanceSpan = document.getElementById('user-balance');
+            const dexForm = document.getElementById('dex-form');
+            const amountInInput = document.getElementById('amount-in');
+            const amountOutInput = document.getElementById('amount-out');
+            const tabs = document.querySelectorAll('.tab-button');
+            const labelIn = document.getElementById('label-in');
+            const labelOut = document.getElementById('label-out');
+            const symbolIn = document.getElementById('symbol-in');
+            const symbolOut = document.getElementById('symbol-out');
+
+            let provider, signer, contract, userAddress;
+            let calculationTimeout;
+
+            const setupApp = async () => {
+                if (typeof window.ethereum === 'undefined') {
+                    updateStatus('Please install MetaMask!', true);
+                    connectButton.disabled = true;
+                    return;
+                }
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                try {
+                    const accounts = await provider.listAccounts();
+                    if (accounts.length > 0) {
+                        await connectWallet();
+                    }
+                } catch (error) {
+                    console.error("Could not auto-connect:", error);
+                }
+
+                window.ethereum.on('accountsChanged', () => window.location.reload());
+                window.ethereum.on('chainChanged', () => window.location.reload());
+            };
+
+            const connectWallet = async () => {
+                try {
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+
+                    const network = await provider.getNetwork();
+                    if (`0x${network.chainId.toString(16)}` !== TARGET_CHAIN_ID) {
+                        await switchNetwork();
+                        return;
+                    }
+
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    updateStatus('Wallet connected.', false, true);
+                    connectButton.textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
+                    submitButton.disabled = false;
+                    updateSubmitButtonText();
+                    updateBalances();
+                } catch (error) {
+                    updateStatus('Failed to connect wallet.', true);
+                    console.error(error);
+                }
+            };
+
+            const switchNetwork = async () => {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: TARGET_CHAIN_ID }],
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: TARGET_CHAIN_ID,
+                                    chainName: TARGET_NETWORK_NAME,
+                                    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                    rpcUrls: [TARGET_RPC_URL]
+                                }],
+                            });
+                        } catch (addError) {
+                            updateStatus(`Failed to add ${TARGET_NETWORK_NAME} network.`, true);
+                        }
+                    } else {
+                        updateStatus(`Please switch to the ${TARGET_NETWORK_NAME} network.`, true);
+                    }
+                }
+            };
+
+            const updateBalances = async () => {
+                if (!signer || !contract) return;
+                try {
+                    const ethBalance = await signer.getBalance();
+                    const tokenBalance = await contract.balanceOf(userAddress);
+                    userBalanceSpan.textContent = `ETH: ${parseFloat(ethers.utils.formatEther(ethBalance)).toFixed(4)} | QSRMt: ${parseFloat(ethers.utils.formatEther(tokenBalance)).toFixed(2)}`;
+                } catch (error) {
+                    console.error("Failed to update balances:", error);
+                    userBalanceSpan.textContent = 'Failed to load balances';
+                }
+            };
+
+            const updateUIForMode = (mode) => {
+                dexForm.dataset.mode = mode;
+                amountInInput.value = '';
+                amountOutInput.value = '';
+                if (mode === 'buy') {
+                    labelIn.textContent = 'You Pay (ETH)';
+                    labelOut.textContent = 'You Receive (QSRMt)';
+                    symbolIn.textContent = 'ETH';
+                    symbolOut.textContent = 'QSRMt';
+                } else {
+                    labelIn.textContent = 'You Pay (QSRMt)';
+                    labelOut.textContent = 'You Receive (ETH)';
+                    symbolIn.textContent = 'QSRMt';
+                    symbolOut.textContent = 'ETH';
+                }
+                updateSubmitButtonText();
+            };
+
+            const updateSubmitButtonText = () => {
+                if (!signer) {
+                    submitButton.textContent = 'Connect Wallet';
+                    return;
+                }
+                const mode = dexForm.dataset.mode;
+                submitButton.textContent = mode === 'buy' ? 'Buy' : 'Sell';
+            };
+
+            const handleInputChange = async () => {
+                clearTimeout(calculationTimeout);
+                calculationTimeout = setTimeout(async () => {
+                    if (!contract) return;
+                    const amountIn = parseFloat(amountInInput.value);
+                    if (!amountIn || amountIn <= 0 || isNaN(amountIn)) {
+                        amountOutInput.value = '';
+                        return;
+                    }
+
+                    try {
+                        const amountInWei = ethers.utils.parseEther(amountIn.toString());
+                        const mode = dexForm.dataset.mode;
+                        let amountOutWei;
+
+                        if (mode === 'buy') {
+                            amountOutWei = await contract.getBuyAmount(amountInWei);
+                        } else {
+                            amountOutWei = await contract.getSellAmount(amountInWei);
+                        }
+                        amountOutInput.value = parseFloat(ethers.utils.formatEther(amountOutWei)).toFixed(5);
+                    } catch (error) {
+                        console.error("Calculation error:", error);
+                        amountOutInput.value = 'Error';
+                    }
+                }, 300);
+            };
+
+            const performTransaction = async (event) => {
+                event.preventDefault();
+                if (!contract || !signer) return;
+
+                const amountIn = amountInInput.value;
+                const amountOut = amountOutInput.value;
+
+                if (!amountIn || parseFloat(amountIn) <= 0 || !amountOut || parseFloat(amountOut) <= 0) {
+                    updateStatus('Please enter a valid amount.', true);
+                    return;
+                }
+
+                submitButton.disabled = true;
+
+                try {
+                    const amountInWei = ethers.utils.parseEther(amountIn);
+                    const amountOutWei = ethers.utils.parseEther(amountOut);
+                    const mode = dexForm.dataset.mode;
+                    let tx;
+
+                    updateStatus('Checking transaction...', false);
+
+                    if (mode === 'buy') {
+                        try {
+                            await contract.callStatic.buy(amountOutWei, { value: amountInWei });
+                        } catch (simError) {
+                            console.error("Simulation failed:", simError);
+                            updateStatus(simError.reason || "Transaction will likely fail.", true);
+                            submitButton.disabled = false;
+                            return;
+                        }
+
+                        updateStatus('Confirm transaction in your wallet...', false);
+                        tx = await contract.buy(amountOutWei, { value: amountInWei });
+
+                    } else {
+                        try {
+                             await contract.callStatic.sell(amountInWei, amountOutWei);
+                        } catch(simError) {
+                            console.error("Simulation failed:", simError);
+                            updateStatus(simError.reason || "Transaction will likely fail.", true);
+                            submitButton.disabled = false;
+                            return;
+                        }
+
+                        updateStatus('Confirm transaction in your wallet...', false);
+                        tx = await contract.sell(amountInWei, amountOutWei);
+                    }
+
+                    await tx.wait();
+                    updateStatus('Transaction successful!', false, true);
+                    updateBalances();
+                    amountInInput.value = '';
+                    amountOutInput.value = '';
+
+                } catch (error) {
+                    console.error(error);
+                    const message = error.reason || "Transaction rejected or an error occurred.";
+                    updateStatus(message, true);
+                } finally {
+                    submitButton.disabled = false;
+                }
+            };
+
+            function updateStatus(message, isError = false, isSuccess = false) {
+                statusMessage.textContent = message;
+                statusMessage.className = '';
+                if (isError) statusMessage.classList.add('error');
+                if (isSuccess) statusMessage.classList.add('success');
+
+                if (isSuccess || isError) {
+                    setTimeout(() => {
+                        if (statusMessage.textContent === message) {
+                            statusMessage.textContent = '';
+                            statusMessage.className = '';
+                        }
+                    }, 5000);
+                }
+            }
+
+            connectButton.addEventListener('click', connectWallet);
+            dexForm.addEventListener('submit', performTransaction);
+            amountInInput.addEventListener('input', handleInputChange);
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    updateUIForMode(tab.dataset.mode);
+                });
+            });
+
+            setupApp();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quasareum Mining (Berachain)</title>
+    <link rel="icon" type="image/png" href="images/logo_min_no_bg.png">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #00aaff;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #888;
+            --border-color: #333;
+            --error-color: #ff4d4d;
+            --success-color: #4dff4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            flex-basis: 100%;
+            text-align: center;
+        }
+
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        #user-balance {
+            font-size: 0.8rem;
+            background: #2a2a2a;
+            padding: 6px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        #connect-button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        #connect-button:hover {
+            background-color: #0088cc;
+        }
+
+        .form-group {
+            background-color: #2a2a2a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background-color: #0088cc;
+        }
+
+        .submit-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        #status-message {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            min-height: 1.2em;
+            word-wrap: break-word;
+        }
+
+        .cooldown-info {
+            text-align: center;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .error { color: var(--error-color); }
+        .success { color: var(--success-color); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quasareum Mining (Berachain)</h1>
+            <div class="wallet-info">
+                <span id="user-balance">BERA: 0.0 | QSRMt: 0.0</span>
+                <button id="connect-button">Connect Wallet</button>
+            </div>
+        </header>
+
+        <main class="mining-form">
+            <form id="mine-form">
+                <div id="cooldown-info" class="cooldown-info">
+                    Connect wallet to check status
+                </div>
+
+                <div class="form-group">
+                    <label for="solution-input">Your Solution</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="solution-input" placeholder="Enter your solution here...">
+                    </div>
+                </div>
+
+                <button id="mine-button" class="submit-button" disabled>Connect Wallet</button>
+                <p id="status-message"></p>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- BERACHAIN CONFIGURATION ---
+            const CONTRACT_ADDRESS = "0xe7b6dcAc6A6600273ac24c526B4c42B257561207";
+            const TARGET_CHAIN_ID = "0x138de"; // 80094 for Berachain
+            const TARGET_NETWORK_NAME = "Berachain";
+            const TARGET_RPC_URL = "https://rpc.berachain.com";
+            const NATIVE_CURRENCY_SYMBOL = "BERA";
+            const BLOCK_EXPLORER_URL = "https://berascan.com/";
+            const MINE_DELAY_SECONDS = 900;
+            // --- END OF CONFIGURATION ---
+
+            const CONTRACT_ABI = [
+                {"inputs":[{"internalType":"uint256","name":"initialMarketTokens","type":"uint256"},{"internalType":"uint256","name":"initialPrice","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"ethSpent","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"tokensReceived","type":"uint256"}],"name":"Bought","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"MarketPaused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"MarketUnpaused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"miner","type":"address"},{"indexed":false,"internalType":"string","name":"solution","type":"string"}],"name":"Mined","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"seller","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokensSold","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"ethReceived","type":"uint256"}],"name":"Sold","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"by","type":"address"}],"name":"Unpaused","type":"event"},
+                {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"lastMineTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"expectedTokens","type":"uint256"}],"name":"buy","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"ethAmount","type":"uint256"}],"name":"getBuyAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenAmount","type":"uint256"}],"name":"getSellAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"marketPaused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"solution","type":"string"}],"name":"mine","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"pauseMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pricePerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"string","name":"s","type":"string"}],"name":"quasareumHash","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"expectedEth","type":"uint256"}],"name":"sell","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newPrice","type":"uint256"}],"name":"setPrice","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpauseMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+            ];
+
+            const connectButton = document.getElementById('connect-button');
+            const userBalanceSpan = document.getElementById('user-balance');
+            const mineForm = document.getElementById('mine-form');
+            const solutionInput = document.getElementById('solution-input');
+            const mineButton = document.getElementById('mine-button');
+            const statusMessage = document.getElementById('status-message');
+            const cooldownInfo = document.getElementById('cooldown-info');
+
+            let provider, signer, contract, userAddress;
+            let cooldownInterval;
+
+            const setupApp = async () => {
+                if (typeof window.ethereum === 'undefined') {
+                    updateStatus('Please install a web3 wallet!', true);
+                    connectButton.disabled = true;
+                    return;
+                }
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                try {
+                    const accounts = await provider.listAccounts();
+                    if (accounts.length > 0) await connectWallet();
+                } catch (error) { console.error("Could not auto-connect:", error); }
+
+                window.ethereum.on('accountsChanged', () => window.location.reload());
+                window.ethereum.on('chainChanged', () => window.location.reload());
+            };
+
+            const connectWallet = async () => {
+                try {
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    const network = await provider.getNetwork();
+
+                    if (`0x${network.chainId.toString(16)}` !== TARGET_CHAIN_ID) {
+                        await switchNetwork();
+                        return;
+                    }
+
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    updateStatus('Wallet connected.', false, true);
+                    connectButton.textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
+                    mineButton.textContent = 'Mine';
+                    updateBalances();
+                    updateCooldownStatus();
+                } catch (error) {
+                    updateStatus('Failed to connect wallet.', true);
+                    console.error(error);
+                }
+            };
+
+            const switchNetwork = async () => {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: TARGET_CHAIN_ID }],
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: TARGET_CHAIN_ID,
+                                    chainName: TARGET_NETWORK_NAME,
+                                    nativeCurrency: { name: NATIVE_CURRENCY_SYMBOL, symbol: NATIVE_CURRENCY_SYMBOL, decimals: 18 },
+                                    rpcUrls: [TARGET_RPC_URL],
+                                    blockExplorerUrls: [BLOCK_EXPLORER_URL]
+                                }],
+                            });
+                        } catch (addError) { updateStatus(`Failed to add ${TARGET_NETWORK_NAME} network.`, true); }
+                    } else { updateStatus(`Please switch to the ${TARGET_NETWORK_NAME} network.`, true); }
+                }
+            };
+
+            const updateBalances = async () => {
+                if (!signer || !contract) return;
+                try {
+                    const nativeBalance = await signer.getBalance();
+                    const tokenBalance = await contract.balanceOf(userAddress);
+                    userBalanceSpan.textContent = `${NATIVE_CURRENCY_SYMBOL}: ${parseFloat(ethers.utils.formatEther(nativeBalance)).toFixed(4)} | QSRMt: ${parseFloat(ethers.utils.formatEther(tokenBalance)).toFixed(2)}`;
+                } catch (error) { console.error("Failed to update balances:", error); }
+            };
+
+            const updateCooldownStatus = async () => {
+                if (!contract || !userAddress) return;
+                clearInterval(cooldownInterval);
+
+                const lastMineTimestamp = (await contract.lastMineTime(userAddress)).toNumber();
+                const nextMineTimestamp = lastMineTimestamp + MINE_DELAY_SECONDS;
+
+                const updateTimer = () => {
+                    const now = Math.floor(Date.now() / 1000);
+                    const timeLeft = nextMineTimestamp - now;
+
+                    if (timeLeft > 0) {
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        cooldownInfo.textContent = `Time until next mine: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        mineButton.disabled = true;
+                    } else {
+                        cooldownInfo.textContent = 'Ready to mine';
+                        mineButton.disabled = false;
+                        clearInterval(cooldownInterval);
+                    }
+                };
+                updateTimer();
+                cooldownInterval = setInterval(updateTimer, 1000);
+            };
+
+            const performMine = async (event) => {
+                event.preventDefault();
+                if (!contract || !signer) return;
+                const solution = solutionInput.value;
+                if (!solution) {
+                    updateStatus('Solution cannot be empty.', true);
+                    return;
+                }
+
+                mineButton.disabled = true;
+                updateStatus('Checking and sending transaction...', false);
+
+                try {
+                    await contract.callStatic.mine(solution);
+                    updateStatus('Confirm transaction in your wallet...', false);
+
+                    const tx = await contract.mine(solution);
+                    const receipt = await tx.wait();
+
+                    const minedEvent = receipt.events?.find(e => e.event === 'Mined');
+                    if (minedEvent) {
+                        updateStatus('Success! You mined 1 QSRMt.', false, true);
+                    } else {
+                        updateStatus('Solution submitted, but hash did not match target.', false);
+                    }
+                } catch (error) {
+                    console.error("Mining failed:", error);
+                    updateStatus(error.reason || 'Transaction rejected or an error occurred.', true);
+                } finally {
+                    updateBalances();
+                    updateCooldownStatus();
+                    solutionInput.value = '';
+                }
+            };
+
+            function updateStatus(message, isError = false, isSuccess = false) {
+                statusMessage.textContent = message;
+                statusMessage.className = '';
+                if (isError) statusMessage.classList.add('error');
+                if (isSuccess) statusMessage.classList.add('success');
+
+                if (isSuccess || isError) {
+                    setTimeout(() => {
+                        if (statusMessage.textContent === message) { statusMessage.textContent = ''; statusMessage.className = ''; }
+                    }, 5000);
+                }
+            }
+
+            connectButton.addEventListener('click', connectWallet);
+            mineForm.addEventListener('submit', performMine);
+            setupApp();
+        });
+    </script>
+</body>
+</html>
