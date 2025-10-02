@@ -222,7 +222,7 @@
         <header>
             <h1>Quasareum Market (Berachain)</h1>
             <div class="wallet-info">
-                <span id="user-balance">BERA: 0.0 | QSRMt: 0.0</span>
+                <span id="user-balance">BERA: 0.0 | QSRM: 0.0</span>
                 <button id="connect-button">Connect Wallet</button>
             </div>
         </header>
@@ -230,8 +230,8 @@
         <main class="dex-form">
             <form id="dex-form" data-mode="buy">
                 <div class="tabs">
-                    <button type="button" class="tab-button active" data-mode="buy">Buy QSRMt</button>
-                    <button type="button" class="tab-button" data-mode="sell">Sell QSRMt</button>
+                    <button type="button" class="tab-button active" data-mode="buy">Buy QSRM</button>
+                    <button type="button" class="tab-button" data-mode="sell">Sell QSRM</button>
                 </div>
 
                 <div class="form-group">
@@ -245,10 +245,10 @@
                 <div class="arrow">↓</div>
 
                 <div class="form-group">
-                    <label for="amount-out" id="label-out">You Receive (QSRMt)</label>
+                    <label for="amount-out" id="label-out">You Receive (QSRM)</label>
                      <div class="input-wrapper">
                         <input type="text" id="amount-out" placeholder="0.0" disabled>
-                         <span class="token-symbol" id="symbol-out">QSRMt</span>
+                         <span class="token-symbol" id="symbol-out">QSRM</span>
                     </div>
                 </div>
 
@@ -359,7 +359,7 @@
                 try {
                     const nativeBalance = await signer.getBalance();
                     const tokenBalance = await contract.balanceOf(userAddress);
-                    userBalanceSpan.textContent = `${NATIVE_CURRENCY_SYMBOL}: ${parseFloat(ethers.utils.formatEther(nativeBalance)).toFixed(4)} | QSRMt: ${parseFloat(ethers.utils.formatEther(tokenBalance)).toFixed(2)}`;
+                    userBalanceSpan.textContent = `${NATIVE_CURRENCY_SYMBOL}: ${parseFloat(ethers.utils.formatEther(nativeBalance)).toFixed(4)} | QSRM: ${parseFloat(ethers.utils.formatEther(tokenBalance)).toFixed(2)}`;
                 } catch (error) {
                     console.error("Failed to update balances:", error);
                     userBalanceSpan.textContent = 'Failed to load balances';
@@ -372,13 +372,13 @@
                 amountOutInput.value = '';
                 if (mode === 'buy') {
                     labelIn.textContent = `You Pay (${NATIVE_CURRENCY_SYMBOL})`;
-                    labelOut.textContent = 'You Receive (QSRMt)';
+                    labelOut.textContent = 'You Receive (QSRM)';
                     symbolIn.textContent = NATIVE_CURRENCY_SYMBOL;
-                    symbolOut.textContent = 'QSRMt';
+                    symbolOut.textContent = 'QSRM';
                 } else {
-                    labelIn.textContent = 'You Pay (QSRMt)';
+                    labelIn.textContent = 'You Pay (QSRM)';
                     labelOut.textContent = `You Receive (${NATIVE_CURRENCY_SYMBOL})`;
-                    symbolIn.textContent = 'QSRMt';
+                    symbolIn.textContent = 'QSRM';
                     symbolOut.textContent = NATIVE_CURRENCY_SYMBOL;
                 }
                 updateSubmitButtonText();
@@ -504,4 +504,5 @@
         });
     </script>
 </body>
+
 </html>
