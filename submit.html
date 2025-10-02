@@ -180,7 +180,7 @@
         <header>
             <h1>Quasareum Mining (Berachain)</h1>
             <div class="wallet-info">
-                <span id="user-balance">BERA: 0.0 | QSRMt: 0.0</span>
+                <span id="user-balance">BERA: 0.0 | QSRM: 0.0</span>
                 <button id="connect-button">Connect Wallet</button>
             </div>
         </header>
@@ -302,7 +302,7 @@
                 try {
                     const nativeBalance = await signer.getBalance();
                     const tokenBalance = await contract.balanceOf(userAddress);
-                    userBalanceSpan.textContent = `${NATIVE_CURRENCY_SYMBOL}: ${parseFloat(ethers.utils.formatEther(nativeBalance)).toFixed(4)} | QSRMt: ${parseFloat(ethers.utils.formatEther(tokenBalance)).toFixed(2)}`;
+                    userBalanceSpan.textContent = `${NATIVE_CURRENCY_SYMBOL}: ${parseFloat(ethers.utils.formatEther(nativeBalance)).toFixed(4)} | QSRM: ${parseFloat(ethers.utils.formatEther(tokenBalance)).toFixed(2)}`;
                 } catch (error) { console.error("Failed to update balances:", error); }
             };
 
@@ -353,7 +353,7 @@
 
                     const minedEvent = receipt.events?.find(e => e.event === 'Mined');
                     if (minedEvent) {
-                        updateStatus('Success! You mined 1 QSRMt.', false, true);
+                        updateStatus('Success! You mined 1 QSRM.', false, true);
                     } else {
                         updateStatus('Solution submitted, but hash did not match target.', false);
                     }
@@ -386,4 +386,5 @@
         });
     </script>
 </body>
+
 </html>
